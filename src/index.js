@@ -32,33 +32,28 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-	constructor(props) {
-		super(props)
-		this.state = {
-			squares: Array(9).fill(null),
-			xIsNext: true
-		}
-	}
+	// constructor(props) {
+	// 	super(props)
+	// 	this.state = {
+	// 		squares: Array(9).fill(null),
+	// 		xIsNext: true
+	// 	}
+	// }
 
-	handleClick(i) {
-		//console.log("handled click!!!")
-		const squares = this.state.squares.slice()
-		squares[i] = this.state.xIsNext ? "X" : "O"
-		this.setState({ squares: squares, xIsNext: !this.state.xIsNext })
-	}
+	
 
 	renderSquare(i) {
-		return <Square value={this.state.squares[i]} onClick={() => this.handleClick(i)} />;
+		return <Square value={this.props.squares[i]} onClick={() => this.props.handleClick(i)} />;
 	}
 
 	render() {
 
 		let status
-		const winner = calculateWinner(this.state.squares)
+		const winner = calculateWinner(this.props.squares)
 		if(winner){
 			status = 'Winner: ' + winner
 		} else {
-			status = 'Next player: ' + (this.state.xIsNext ? "X" : "O")
+			status = 'Next player: ' + (this.props.xIsNext ? "X" : "O")
 		}
 
 		return (
@@ -85,14 +80,42 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+	constructor(props){
+		super(props)
+		this.state = {
+			history:[Array(9).fill(null)],
+			xIsNext:true
+		}
+		//console.log("history:")
+		//console.log(this.state.history[this.state.history.length - 1])
+	}
+
+
+	handleClickForGame(i) {
+		//console.log("handled click!!!")
+		//console.log(this.state.history)
+		let squares = this.state.history[this.state.history.length - 1].slice()
+		if(calculateWinner(squares) || squares[i]) //if there is already a winner, or if the current square is already filled
+			return
+
+		squares[i] = this.state.xIsNext ? "X" : "O"
+		this.state.history[this.state.history.length] = squares
+		this.setState({xIsNext: !this.state.xIsNext })
+	}
+
+	
 	render() {
 		return (
 			<div className="game">
 				<div className="game-board">
-					<Board />
+					<Board squares={this.state.history[this.state.history.length - 1]} 
+					xIsNext={this.state.xIsNext} handleClick={i => this.handleClickForGame(i)} />
+					{/* note, in the line above, for handleClick, the following do not work:
+					handleClick= this.handleClickForGame
+					handleClick = function(i){this.handleClickForGame(i)} */}
 				</div>
 				<div className="game-info">
-					<div>{/* status */}</div>
+					<div>{/* status */}</div>	
 					<ol>{/* TODO */}</ol>
 				</div>
 			</div>
